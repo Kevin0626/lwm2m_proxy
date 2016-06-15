@@ -1,6 +1,6 @@
 //============================================================================
 // Name        : lwm2m_on_radio.cpp
-// Author      : Jerry Liu
+// Author      : 
 // Version     :
 // Copyright   : Your copyright notice
 // Description : Hello World in C++, Ansi-style
@@ -24,6 +24,10 @@ extern int32_t rpcTransportOpen(char *_devicePath, uint32_t port);
 
 extern char sync_bytes[2];
 
+const char * server = "[::1]";
+const char * serverPort = "5683";
+
+
 void send_addr(int addr, int fd)
 {
 
@@ -40,24 +44,53 @@ void send_addr(int addr, int fd)
 	WriteUART(fd, (uint8_t *)buffer, sizeof(packet_t)+ out->payload_len+sizeof(sync_bytes));
 }
 
-int main() {
-	cout << "!!!Hello World!!!. packet header size is " << sizeof(packet_t) << endl; // prints !!!Hello World!!!
 
-	int fd = OpenUART("/dev/ttyUSB1");
+void print_usage(void)
+{
+    fprintf(stdout, "Options:\r\n");
+    fprintf(stdout, "  -u UART\tSet the UART port name of radio module connection. Default: /dev/ttyUSB0\r\n");
+    //fprintf(stdout, "  -l PORT\tSet the local UDP port of the Client. Default: 56830\r\n");
+    fprintf(stdout, "  -h HOST\tSet the hostname of the LWM2M Server to connect to. Default: localhost\r\n");
+    fprintf(stdout, "  -p PORT\tSet the port of the LWM2M Server to connect to. Default: 5683\r\n");
+    //fprintf(stdout, "  -c\t\tChange battery level over time.\r\n");
+    fprintf(stdout, "\r\n");
+}
+
+
+int main(int argc, char *argv[])
+{
+    int opt;
+    char * uart ="/dev/ttyUSB0";
+
+
+	cout << "Start LWM2M on Radio Agent. Packet header size is " << sizeof(packet_t) << endl; // prints !!!Hello World!!!
+    while ((opt = getopt(argc, argv, "bu:p:s:")) != -1)
+    {
+        switch (opt)
+        {
+        case 'b':
+            //bootstrapRequested = true;
+            break;
+        case 'u':
+        	uart = optarg;
+            break;
+        case 's':
+            server = optarg;
+            break;
+        case 'p':
+            serverPort = optarg;
+            break;
+        default:
+            print_usage();
+            return 0;
+        }
+    }
+
+
+	int fd = OpenUART(uart);
 	if(fd == -1)
 		return -1;
 
-	//UART0_Init(fd);
-
-	uint8_t addr = 0;
-	while(addr < 5)
-	{
-		addr++;
-
-		//send_addr(addr, fd);
-
-		//sleep(1);
-	}
 
 	CRadioUartPort * port = new CRadioUartPort();
 	port->m_fd = fd;

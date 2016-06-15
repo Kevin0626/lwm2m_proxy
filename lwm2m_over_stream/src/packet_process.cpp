@@ -2,7 +2,7 @@
  * packet_process.cpp
  *
  *  Created on: Jan 16, 2016
- *      Author: Jerry Liu
+ *      Author:
  */
 
 
@@ -22,7 +22,8 @@
 
 #include "CRadioUartPort.h"
 
-
+extern const char * server;
+extern const char * serverPort;
 
 socklen_t g_sl = 0;
 struct sockaddr g_addr;
@@ -40,7 +41,7 @@ int get_server_addr()
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_DGRAM;
 
-    if (0 != getaddrinfo("localhost", "5683", &hints, &servinfo) || servinfo == NULL)
+    if (0 != getaddrinfo(server, serverPort, &hints, &servinfo) || servinfo == NULL)
     {
     	WARNING("passthrough:fail to get server addr: %d", errno);
     	return 0;
@@ -128,15 +129,6 @@ void handle_address_request(packet_t *)
 void *PassthroughTask(void *argument)
 {
 	CRadioUartPort * port = (CRadioUartPort *) argument;
-	uint8_t addr = 0;
-	while(addr < 5)
-	{
-		addr++;
-
-		//send_addr(addr, port->m_fd);
-
-		//sleep(1);
-	}
 
 	printf("start process....\n\n");
 	port->process();
